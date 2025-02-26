@@ -9,7 +9,6 @@ export default function Home() {
   const [newTask, setNewTask] = useState('');
   const [loading, setLoading] = useState(false);
 
-
   useEffect(() => {
     async function fetchTodos() {
       setLoading(true);
@@ -21,7 +20,7 @@ export default function Home() {
     fetchTodos();
   }, []);
 
- 
+
   const handleAddTodo = async (e) => {
     e.preventDefault();
     if (!newTask.trim()) return;
@@ -29,6 +28,7 @@ export default function Home() {
     const newTodo = {
       title: newTask,
       completed: false,
+      priority: 'Normal', 
     };
 
     const response = await fetch(API_URL, {
@@ -42,7 +42,7 @@ export default function Home() {
     setNewTask('');
   };
 
-
+  // Toggle completion status of a todo
   const handleToggleCompletion = async (id, completed) => {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'PATCH',
@@ -56,7 +56,7 @@ export default function Home() {
     );
   };
 
-
+  // Delete a todo
   const handleDeleteTodo = async (id) => {
     await fetch(`${API_URL}/${id}`, {
       method: 'DELETE',
@@ -66,54 +66,74 @@ export default function Home() {
   };
 
   return (
-     <div className="container mx-auto p-8">
-      <h1 className="text-4xl font-bold text-center mb-8">Todo App</h1>
+    <div className="w-full bg-[#E8E8E8] flex justify-center place-items-center p-8">
+      <div className="max-w-[70rem] bg-white w-full p-8">
+      
+        <form onSubmit={handleAddTodo} className="mb-4 flex justify-center gap-2">
+          <input
+            type="text"
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+            className="border border-gray-300 p-2 rounded-lg w-1/3"
+            placeholder="New task"
+          />
+          <button
+            type="submit"
+            className="bg-[#3756F9] text-white text-base font-medium px-4 py-2 rounded-lg"
+          >
+            Add New Task
+          </button>
+        </form>
 
-      <form onSubmit={handleAddTodo} className="mb-4 flex justify-center gap-2">
-        <input
-          type="text"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          className="border border-gray-300 p-2 rounded-lg w-1/3"
-          placeholder="New task"
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-        >
-          Add Todo
-        </button>
-      </form>
+        <div className="mb-4 font-semibold text-xl">All Tasks</div>
 
-      {loading ? (
-        <p className="text-center">Loading...</p>
-      ) : (
-        <ul className="space-y-4">
-          {todos.map((todo) => (
-            <li key={todo.id} className="flex justify-between items-center p-4 bg-gray-100 rounded-lg">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={todo.completed}
-                  onChange={() => handleToggleCompletion(todo.id, todo.completed)}
-                  className="h-5 w-5"
-                />
-                <span
-                  className={`flex-1 ${todo.completed ? 'line-through text-gray-500' : ''}`}
-                >
-                  {todo.title}
-                </span>
-              </div>
-              <button
-                onClick={() => handleDeleteTodo(todo.id)}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg"
-              >
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+        {loading ? (
+          <p className="text-center">Loading...</p>
+        ) : (
+          <table className="min-w-full table-auto border-collapse">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border px-4 py-2 text-left">Task</th>
+                <th className="border px-4 py-2 text-left">Status</th>
+                <th className="border px-4 py-2 text-left">Priority</th>
+                <th className="border px-4 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {todos.map((todo) => (
+                <tr key={todo.id} className="bg-gray-100 hover:bg-gray-200">
+                  <td className="border px-4 py-2">
+                    <span
+                      className={`${
+                        todo.completed ? 'line-through text-gray-500' : ''
+                      }`}
+                    >
+                      {todo.title}
+                    </span>
+                  </td>
+                  <td className="border px-4 py-2">
+                    <input
+                      type="checkbox"
+                      checked={todo.completed}
+                      onChange={() => handleToggleCompletion(todo.id, todo.completed)}
+                      className="h-5 w-5"
+                    />
+                  </td>
+                  <td className="border px-4 py-2">{todo.priority || 'Normal'}</td>
+                  <td className="border px-4 py-2">
+                    <button
+                      onClick={() => handleDeleteTodo(todo.id)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
